@@ -1,13 +1,20 @@
 # AI Scraper
 
-A generic extraction platform that:
+A generic AI-powered extraction platform that:
 
-- Fetches web pages
-- Detects repeating entity blocks
-- Uses LLMs to extract requested fields
+- Detects entity blocks automatically
+- Extracts user-requested fields
 - Supports JSON and CSV output
-- Exposes a FastAPI interface
+- Exposes a FastAPI API
 
-Current status:
-- Quotes site ✅
-- Books site ✅
+## Example
+
+POST /extract
+
+{
+  "url": "https://books.toscrape.com",
+  "fields": [
+    "title",
+    "price"
+  ]
+}

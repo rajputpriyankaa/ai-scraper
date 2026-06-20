@@ -165,17 +165,21 @@ Response:
 
 ```
 ai-scraper/
-├── main.py                  # FastAPI app and route definitions
-├── scraper/
-│   ├── detector.py          # Render strategy detection logic
-│   ├── fetcher.py           # requests + Playwright fetchers
-│   ├── cleaner.py           # HTML/JSON normalization
-│   ├── scorer.py            # Chunk scoring engine
-│   ├── entity_detector.py   # Pre-AI regex extraction
-│   └── extractor.py         # Gemini API integration
-├── models/
-│   └── schemas.py           # Pydantic request/response models
-└── requirements.txt
+├── api.py                        # FastAPI entry point, route definitions
+├── logging_config.py             # Logging setup
+│
+├── detectors/
+│   ├── detect_rendering.py       # Render strategy detection (requests_ok / playwright_dom / playwright_network)
+│   └── entity_detector.py        # Chunk scoring + Gemini-based entity selection
+│
+├── extractors/
+│   └── data_extractor.py         # Gemini field extraction from scored chunk
+│
+├── scrapers/
+│   └── requests_scraper.py       # HTTP fetch + DOM cleaning + Playwright (stubbed)
+│
+└── services/
+    └── pipeline.py               # Orchestrates fetch → detect → score → extract
 ```
 
 ---

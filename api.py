@@ -1,16 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from ai_scraper.services.pipeline import run_pipeline
-from dotenv import load_dotenv
-from pathlib import Path
-import os
+from ai_scraper.logging_config import logger
 
-BASE_DIR = Path(__file__).resolve().parent
 
-load_dotenv(BASE_DIR / ".env")
 app = FastAPI()
-print("Current working directory:", os.getcwd())
-print(f'GEMINI_API_KEY: {os.getenv("GEMINI_API_KEY")}')
+
 
 class ScrapeRequest(BaseModel):
     url: str
@@ -21,6 +16,7 @@ class ScrapeRequest(BaseModel):
 
 @app.post("/extract")
 def scrape(req: ScrapeRequest):
+    logger.info("Extractor endpoint called")
     return run_pipeline(
         req.url,
         req.fields,

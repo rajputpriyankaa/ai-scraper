@@ -1,0 +1,9 @@
+output.json
+ai_scraper/utils
+ai_scraper/logs
+ai_scraper/.env
+ai_scraper/__pycache__/
+ai_scraper/*.pyc
+ai_scraper/output.csv
+ai_scraper/output.txt
+ai_scraper/output.html

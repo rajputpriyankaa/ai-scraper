@@ -11,27 +11,41 @@ genai.configure(
 model = genai.GenerativeModel("gemini-3.5-flash")
 # model = genai.GenerativeModel("gemini-2.5-flash")
 
-def call_gemini(html, fields) -> list:
+def call_gemini(content, fields, response_type) -> list:
     fields_text = "\n".join(
         f"- {field}"
         for field in fields
     )
-    html_chunks = ",\n".join(
-        f"{block}"
-        for block in html
-    )
-    prompt  = f"""You are a data extraction engine.
+    if response_type == 'html':
+        html_chunks = ",\n".join(
+            f"{block}"
+            for block in content
+        )
+        prompt = f"""You are a data extraction engine.
+    
+            Extract:
+    
+            {fields_text}
+    
+            Return ONLY a JSON array.
+    
+            HTML Blocks:
+    
+            {html_chunks}
+            """
 
-        Extract:
-        
-        {fields_text}
-        
-        Return ONLY a JSON array.
-        
-        HTML Blocks:
-        
-        {html_chunks}
+    else:
+        prompt = f"""You are a data extraction engine.
+            Extract:
+    
+            {fields_text}
+            
+            from json {content}
+    
+            Return ONLY a JSON array.
+
         """
+
     try:
         response = model.generate_content(prompt)
         raw = response.text.strip()
@@ -42,6 +56,7 @@ def call_gemini(html, fields) -> list:
 
         parsed = json.loads(raw)
         return parsed
+
 
     except Exception as e:
         logger.error(f"[extractor] error: {e}")
@@ -56,12 +71,26 @@ def parse_fields(user_input):
     ]
 
 
-def extract_data(all_blocks, fields):
+def extract_html_data(all_blocks, fields):
     try:
-        logger.info(f'fields: {fields}')
         logger.info(f'length of all_blocks: {len(all_blocks)}')
-        final_data = call_gemini(all_blocks, fields)
+        final_data = call_gemini(all_blocks, fields, 'html')
         return final_data
 
     except Exception as e:
         logger.error(f'[extract_data] error: {e}')
+
+
+def json_extraction(response, fields):
+    try:
+        logger.info(f'length of json: {len(response)}')
+        final_data = call_gemini(response, fields, 'json')
+        return final_data
+
+    except Exception as e:
+        logger.error(f'[extract_data] error: {e}')
+
+
+# debugging
+# with open('../output.txt', 'r') as f:
+#     text = json_extraction(f.read(), ['date', 'rating', 'text'])

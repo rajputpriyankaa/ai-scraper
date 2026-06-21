@@ -15,17 +15,16 @@ def detect_render_strategy(html: str) -> str:
         if len(visible_text) < 500:
             raw_html = html.lower()
 
-            ### commented for now
 
             # check GraphQL / API hints/ XHR/fetch patterns
-            # api_hints = ["graphql", "apolloclient", "gql`", "__typename", "fetch(", "xmlhttprequest", "axios", "/api/", "/v1/", "/v2/", "apollo", "relay", "urql"]
-            # if any(hint in raw_html for hint in api_hints):
-            #     return "playwright_network"
-            #
-            # # check Known SPA frameworks - needs rendering
-            # dom_hints = ["__next_data__", "ng-version", "data-reactroot", "__nuxt__"]
-            # if any(hint in raw_html for hint in dom_hints):
-            #     return "playwright_dom"
+            api_hints = ["graphql", "apolloclient", "gql`", "__typename", "fetch(", "xmlhttprequest", "axios", "/api/", "/v1/", "/v2/", "apollo", "relay", "urql"]
+            if any(hint in raw_html for hint in api_hints):
+                return "playwright_network"
+
+            # check Known SPA frameworks - needs rendering
+            dom_hints = ["__next_data__", "ng-version", "data-reactroot", "__nuxt__"]
+            if any(hint in raw_html for hint in dom_hints):
+                return "playwright_dom"
 
 
             return "playwright_dom"

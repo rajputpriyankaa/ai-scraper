@@ -1,1 +1,10 @@
+.env
+__pycache__/
+*.pyc
+output.csv
 output.json
+output.html
+output.txt
+main.py
+utils
+logs

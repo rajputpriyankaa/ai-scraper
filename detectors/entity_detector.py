@@ -50,7 +50,7 @@ Candidates:
         return None
 
 
-def detect_html(html, use_mock):
+def detect_html(html):
     try:
         data = BeautifulSoup(html, 'html.parser')
         stats = {}
@@ -101,10 +101,7 @@ def detect_html(html, use_mock):
 
         new_dict.sort(key=lambda x: x['score'], reverse=True)
         chunks = [data.find(item['tag'], attrs={'class': item['class'][0] if len(item['class'])>0 else ''}) for item in new_dict][:10]
-        if use_mock:
-            num = 1
-        else:
-            num = call_gemini(chunks)
+        num = call_gemini(chunks)
         new_data = data.find_all(new_dict[num]['tag'], attrs={'class': new_dict[num]['class'][0]})
         return new_data
 

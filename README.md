@@ -146,9 +146,8 @@ Response:
 | [webscraper.io/test-sites/e-commerce/allinone](https://webscraper.io/test-sites/e-commerce/allinone) | Static HTML, nested category navigation | `requests_ok` |
 | [books.toscrape.com](https://books.toscrape.com) | Static HTML, pagination + detail pages | `requests_ok` |
 | [quotes.toscrape.com](https://quotes.toscrape.com) | Static HTML, author + tag metadata | `requests_ok` |
-| [sandbox.oxylabs.io/products](https://sandbox.oxylabs.io/products) | Next.js SSR, 3000+ product catalogue | `requests_ok` (SSR content in response) |
-
----
+| [sandbox.oxylabs.io/products](https://sandbox.oxylabs.io/products) | Next.js SSR, 3000+ product catalogue | `requests_ok` (SSR content in initial response) |
+| [web-scraping.dev/reviews](https://web-scraping.dev/reviews) | JS-rendered, data via GraphQL API | `playwright_network` (intercepts GraphQL response) |
 
 ## 🛠️ Tech Stack
 
@@ -165,7 +164,8 @@ Response:
 
 ```
 ai-scraper/
-├── api.py                        # FastAPI entry point, route definitions
+├── main.py                       # Entry point — sets Windows ProactorEventLoop before uvicorn starts
+├── api.py                        # FastAPI app, route definitions
 ├── logging_config.py             # Logging setup
 │
 ├── detectors/
@@ -176,7 +176,7 @@ ai-scraper/
 │   └── data_extractor.py         # Gemini field extraction from scored chunk
 │
 ├── scrapers/
-│   └── requests_scraper.py       # HTTP fetch + DOM cleaning + Playwright (stubbed)
+│   └── requests_scraper.py       # TLS-spoofed fetch + DOM cleaning + Playwright DOM/network rendering
 │
 └── services/
     └── pipeline.py               # Orchestrates fetch → detect → score → extract

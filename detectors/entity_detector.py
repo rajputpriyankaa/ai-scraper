@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import google.generativeai as genai
 from ai_scraper.utils.env_loader import get_env_var
 from ai_scraper.logging_config import logger
+from ai_scraper.metrics_store import update_metrics
 
 logger.info(f'GEMINI_API_KEY: {get_env_var("GEMINI_API_KEY")}')
 
@@ -15,7 +16,6 @@ model = genai.GenerativeModel("gemini-3.5-flash")
 # model = genai.GenerativeModel("gemini-2.5-flash")
 
 def call_gemini(chunks) -> int:
-
     html_chunks = "\n\n".join(
         f"Candidate {i+1}:\n {chunks[i]}" if chunks[i] is not None else ""
         for i in range(len(chunks))
@@ -36,14 +36,19 @@ Candidates:
 
     try:
         response = model.generate_content(prompt)
+        update_metrics('total_ai_calls')
         try:
-            index_num = int(response.text.strip())-1
-        except:
-            index_num = int(re.findall(r'\{(\d+)\}', response.text.strip())[0])-1
-
-        logger.debug(f'index_num: {index_num}')
-
-        return index_num
+            index_num = int(response.text.strip()) - 1
+            return index_num
+        except ValueError:
+            numbers = re.findall(r'\d+', response.text.strip())
+            if numbers:
+                index_num = int(numbers[0]) - 1
+                logger.debug(f'index_num: {index_num}')
+                return index_num
+            else:
+                logger.error(f"[call_gemini] could not parse response: {response.text}")
+                return None
 
     except Exception as e:
         logger.error(f"[extractor] error: {e}")
@@ -79,22 +84,10 @@ def detect_html(html):
 
         new_dict = []
         for key, value in stats.items():
-            # avg_children = (
-            #         value["total_children"]
-            #         / value["count"]
-            # )
-            #
-            # avg_text_length = (
-            #         value["total_text_length"]
-            #         / value["count"]
-            # )
-
             score = (
                     value["count"]
                     *value["total_children"]
                     *value["total_text_length"]
-                    # * avg_children
-                    # * avg_text_length
             )
 
             new_dict.append({'tag': key[0], 'class': key[1], 'score': score})
@@ -104,6 +97,7 @@ def detect_html(html):
         num = call_gemini(chunks)
         new_data = data.find_all(new_dict[num]['tag'], attrs={'class': new_dict[num]['class'][0]})
         return new_data
+
 
     except Exception as e:
         logger.error(f"[detect_html] error: {e}")

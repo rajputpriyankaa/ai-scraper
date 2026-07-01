@@ -1,6 +1,7 @@
 import google.generativeai as genai
 from ai_scraper.logging_config import logger
 from ai_scraper.utils.env_loader import get_env_var
+from ai_scraper.metrics_store import update_metrics
 import json
 import re
 
@@ -48,6 +49,7 @@ def call_gemini(content, fields, response_type) -> list:
 
     try:
         response = model.generate_content(prompt)
+        update_metrics('total_ai_calls')
         raw = response.text.strip()
         raw = re.sub(r'```json\s*|```', '', raw).strip()
 
